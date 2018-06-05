@@ -19,8 +19,9 @@ namespace TwitterSearchAPI.Test
         public async Task Search()
         {
             TwitterSearchImpl searh = new TwitterSearchImpl();
-            await searh.Search("Ticketfly Website Offline After Hack – Variety", 100);
+            await searh.SearchAsync("Ticketfly Website Offline After Hack – Variety", 100);
 
+            log.WriteLine("Tweets: {0}", searh.Tweets.Count);
             foreach (var t in searh.Tweets)
             {
                 log.WriteLine($"Tweet:\n{t}");
@@ -33,20 +34,13 @@ namespace TwitterSearchAPI.Test
     {
         private List<Tweet> _tweets = new List<Tweet>();
 
-        public override bool CanExecuteNext(List<Tweet> tweets)
+        protected override bool CanExecute() => _tweets.Count >= 20;
+
+        protected override void OnTweetListReady(List<Tweet> tweets)
         {
-            if (tweets == null || tweets.Count == 0
-                || _tweets.Count >= 20)
-            {
-                return false;
-            }
-
             _tweets.AddRange(tweets);
-
-            return true;
         }
 
         public List<Tweet> Tweets => _tweets;
-        public event Action<List<Tweet>> Done;
     }
 }

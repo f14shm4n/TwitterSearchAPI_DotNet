@@ -48,5 +48,48 @@ namespace TwitterSearchAPI
             }
             return 0;
         }
+
+        public static List<Tweet> ParseTweets(string html)
+        {
+            List<Tweet> tweets = new List<Tweet>();
+            var doc = new HtmlDocument();
+            doc.LoadHtml(html);
+
+            var elements = GetTweetsNodes(doc.DocumentNode);
+            if (elements == null || elements.Count == 0)
+            {
+                return tweets;
+            }
+
+            foreach (var el in elements)
+            {
+                string id = GetTweetId(el);
+                string text = GetTweetText(el);
+                string userId = GetUserId(el);
+                string userScreenName = GetUserScreenName(el);
+                string userName = GetUserName(el);
+                DateTime? createdAt = GetPublishDate(el);
+                int retweets = GetRetweetsCount(el);
+                int favourites = GetFavoritesCount(el);
+
+                Tweet tweet = new Tweet
+                {
+                    Id = id,
+                    Text = text,
+                    UserId = userId,
+                    UserScreenName = userScreenName,
+                    UserName = userName,
+                    CreatedAt = createdAt,
+                    Retweets = retweets,
+                    Favourites = favourites
+                };
+
+                if (tweet.Id != null)
+                {
+                    tweets.Add(tweet);
+                }
+            }
+            return tweets;
+        }
     }
 }
