@@ -19,7 +19,7 @@ namespace TwitterSearchAPI.Test
         public async Task Search()
         {
             TwitterSearchImpl searh = new TwitterSearchImpl();
-            await searh.Search("Alibaba’s Joe Tsai: A lot of people are trying to stop China from upgrading its tech, including Senator Mark Warner", 100);
+            await searh.Search("Ticketfly Website Offline After Hack – Variety", 100);
 
             foreach (var t in searh.Tweets)
             {

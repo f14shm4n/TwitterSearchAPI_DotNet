@@ -49,7 +49,7 @@ namespace TwitterSearchAPI
         public static async Task<TwitterResponse> ExecuteSearch(string url)
         {
             try
-            {
+            {                
                 string html = null;
                 using (var client = new HttpClient())
                 {
