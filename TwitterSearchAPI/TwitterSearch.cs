@@ -12,66 +12,83 @@ namespace TwitterSearchAPI
 {
     public abstract class TwitterSearch
     {
-        public abstract bool CanExecuteNext(List<Tweet> tweets);
+        protected abstract bool CanExecute();
+        protected abstract void OnTweetListReady(List<Tweet> tweets);
 
-        public async Task Search(string query, long rateInMillis)
+        public async Task SearchAsync(string query, long rateInMillis)
         {
-            TwitterResponse response;
-            string url = ConstructURL(query, null);
-            bool continueSearch = true;
-            string minTweet = null;
-
-            while ((response = await ExecuteSearch(url)) != null && continueSearch && response.GetTweets().Count > 0)
+            string payload = await ExecuteHttpRequestAsync(ConstructSearchUrl(query));
+            if (payload == null)
             {
-                if (minTweet == null)
+                return;
+            }
+
+            List<Tweet> tweets = TwitterParser.ParseTweets(payload);
+            if (tweets.Count == 0)
+            {
+                return;
+            }
+
+            OnTweetListReady(tweets);
+
+            TwitterTimelineResponse response;
+            string minTweet = tweets.First().Id;
+            string url = ConstructTimelineUrl(query, minTweet);
+
+            while ((payload = await ExecuteHttpRequestAsync(url)) != null)
+            {
+                response = JsonConvert.DeserializeObject<TwitterTimelineResponse>(payload);
+                if (response == null)
                 {
-                    minTweet = response.GetTweets().First().Id;
+                    break;
                 }
 
-                continueSearch = CanExecuteNext(response.GetTweets());
+                tweets = TwitterParser.ParseTweets(response.items_html);
+                if (tweets.Count == 0)
+                {
+                    break;
+                }
 
-                string maxTweet = response.GetTweets().Last().Id;
+                OnTweetListReady(tweets);
 
+                // TODO: I guess this can be deleted.
+                if (minTweet == null)
+                {
+                    minTweet = tweets.First().Id;
+                }
+
+                if (!CanExecute())
+                {
+                    break;
+                }
+
+                string maxTweet = tweets.Last().Id;
                 if (!minTweet.Equals(maxTweet))
                 {
                     await Task.Delay(TimeSpan.FromMilliseconds(rateInMillis));
 
                     string maxPosition = "TWEET-" + maxTweet + "-" + minTweet;
-                    url = ConstructURL(query, maxPosition);
+                    url = ConstructTimelineUrl(query, maxPosition);
                 }
                 else
                 {
-                    continueSearch = false;
+                    break;
                 }
             }
         }
 
-        public static async Task<TwitterResponse> ExecuteSearch(string url)
+        public static async Task<string> ExecuteHttpRequestAsync(string url)
         {
             try
-            {                
-                string html = null;
+            {
                 using (var client = new HttpClient())
                 {
-                    html = await client.GetStringAsync(url);
-                }
-
-                if (!string.IsNullOrWhiteSpace(html))
-                {
-                    return JsonConvert.DeserializeObject<TwitterResponse>(html);
+                    return await client.GetStringAsync(url);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                try
-                {
-                    await Task.Delay(5000);
-                    return await ExecuteSearch(url);
-                }
-                catch (Exception ex2)
-                {
-                    Debug.WriteLine(ex2.ToString());
-                }
+                Debug.WriteLine(ex.ToString());
             }
 
             return null;
@@ -79,10 +96,30 @@ namespace TwitterSearchAPI
 
         public const string TYPE_PARAM = "f";
         public const string QUERY_PARAM = "q";
+        public const string SRC_PARAM = "src";
         public const string SCROLL_CURSOR_PARAM = "max_position";
-        public const string TWITTER_SEARCH_URL = "https://twitter.com/i/search/timeline";
+        public const string TWITTER_SEARCH_URL = "https://twitter.com/search";
+        public const string TWITTER_TIMELINE_URL = "https://twitter.com/i/search/timeline";
 
-        public static string ConstructURL(string query, string maxPosition)
+        public static string ConstructSearchUrl(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                throw new InvalidQueryException(query);
+            }
+
+            var parameters = HttpUtility.ParseQueryString(string.Empty);
+            parameters[QUERY_PARAM] = query;
+            parameters[SRC_PARAM] = "typd";
+
+            UriBuilder uriBuilder = new UriBuilder(TWITTER_SEARCH_URL)
+            {
+                Query = parameters.ToString()
+            };
+            return uriBuilder.ToString();
+        }
+
+        public static string ConstructTimelineUrl(string query, string maxPosition)
         {
             if (string.IsNullOrWhiteSpace(query))
             {
@@ -97,7 +134,7 @@ namespace TwitterSearchAPI
             {
                 parameters[SCROLL_CURSOR_PARAM] = maxPosition;
             }
-            UriBuilder uriBuilder = new UriBuilder(TWITTER_SEARCH_URL)
+            UriBuilder uriBuilder = new UriBuilder(TWITTER_TIMELINE_URL)
             {
                 Query = parameters.ToString()
             };
