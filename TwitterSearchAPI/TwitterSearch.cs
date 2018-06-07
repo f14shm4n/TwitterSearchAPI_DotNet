@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -18,6 +19,7 @@ namespace TwitterSearchAPI
     {
         private Func<bool> _canExecute;
         private Action<HttpClient> _configureHttpClient;
+        private CancellationToken _cToken;
 
         /// <summary>
         /// Creates new instance of the twitter search.
@@ -53,7 +55,18 @@ namespace TwitterSearchAPI
         /// <param name="query">The search query.</param>
         /// <param name="rateInMillis">"The search iteration interval."</param>
         /// <returns>The search task.</returns>
-        public async Task SearchAsync([NotNull] string query, int rateInMillis)
+        /// <exception cref="InvalidQueryException"></exception>
+        public Task SearchAsync([NotNull] string query, int rateInMillis) => SearchAsync(query, rateInMillis, CancellationToken.None);
+        /// <summary>
+        /// Executes tweets search.
+        /// </summary>
+        /// <param name="query">The search query.</param>
+        /// <param name="rateInMillis">"The search iteration interval."</param>
+        /// <param name="token">Cancellation token.</param>
+        /// <returns>The search task.</returns>
+        /// <exception cref="OperationCanceledException"></exception>
+        /// <exception cref="InvalidQueryException"></exception>
+        public async Task SearchAsync([NotNull] string query, int rateInMillis, CancellationToken token)
         {
             TwitterTimelineResponse response = null;
             string minTweet = null;
@@ -63,6 +76,11 @@ namespace TwitterSearchAPI
 
             while ((payload = await ExecuteHttpRequestAsync(url)) != null)
             {
+                if (token.IsCancellationRequested)
+                {
+                    token.ThrowIfCancellationRequested();
+                }
+                
                 try
                 {
                     response = JsonConvert.DeserializeObject<TwitterTimelineResponse>(payload);
@@ -98,7 +116,7 @@ namespace TwitterSearchAPI
                 string maxTweet = tweets.Last().Id;
                 if (!minTweet.Equals(maxTweet))
                 {
-                    await Task.Delay(rateInMillis);
+                    await Task.Delay(rateInMillis, token);
 
                     string maxPosition = "TWEET-" + maxTweet + "-" + minTweet;
                     url = TwitterUrlHelper.ConstructTimelineUrl(query, maxPosition);
