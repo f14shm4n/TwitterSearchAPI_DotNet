@@ -5,6 +5,9 @@ using System.Text;
 
 namespace TwitterSearchAPI
 {
+    /// <summary>
+    /// Provides methods for tweets parsing.
+    /// </summary>
     internal class TwitterParser
     {
         public static HtmlNodeCollection GetTweetsNodes(HtmlNode docNode) => docNode.SelectNodes("//li[contains(@class, 'js-stream-item')]");

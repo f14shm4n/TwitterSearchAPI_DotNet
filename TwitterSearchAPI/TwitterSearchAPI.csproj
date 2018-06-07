@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
@@ -10,13 +10,14 @@
     <PackageProjectUrl>https://github.com/f14shm4n/TwitterSearchAPI_DotNet</PackageProjectUrl>
     <RepositoryUrl>https://github.com/f14shm4n/TwitterSearchAPI_DotNet</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageTags>NetStandard</PackageTags>
+    <PackageTags>NetStandard;Twitter;Search</PackageTags>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Version>1.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="HtmlAgilityPack" Version="1.8.4" />
+    <PackageReference Include="JetBrains.Annotations" Version="11.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
 

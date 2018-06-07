@@ -10,6 +10,10 @@ namespace TwitterSearchAPI.Test
     {
         private ITestOutputHelper log;
 
+        private string Titles = @"Twitter to Join S&P 500, Stock Hits Record Highs – Variety
+WSJ investigative journalist John Carreyrou on Recode Decode: transcript
+Tencent-Backed Video Streamer Kuaishou Buys Struggling ACFun – Variety";
+
         public SearchTest(ITestOutputHelper log)
         {
             this.log = log;
@@ -18,29 +22,24 @@ namespace TwitterSearchAPI.Test
         [Fact]
         public async Task Search()
         {
-            TwitterSearchImpl searh = new TwitterSearchImpl();
-            await searh.SearchAsync("Ticketfly Website Offline After Hack – Variety", 100);
+            string[] titles = Titles.Split("\r\n");
 
-            log.WriteLine("Tweets: {0}", searh.Tweets.Count);
-            foreach (var t in searh.Tweets)
+            List<Tweet> tweets = new List<Tweet>();
+
+            TwitterSearch searchEngine = new TwitterSearch(() => tweets.Count <= 20);
+            searchEngine.TweetListReady += (s, e) =>
             {
-                log.WriteLine($"Tweet:\n{t}");
+                log.WriteLine("Title: {0}, Tweets: {1}", e.Query, e.Tweets.Count);
+
+                tweets.AddRange(e.Tweets);
+            };
+
+            foreach (var t in titles)
+            {
+                await searchEngine.SearchAsync(t, 100);
             }
-            Assert.NotEmpty(searh.Tweets);
+
+            Assert.NotEmpty(tweets);
         }
-    }
-
-    public class TwitterSearchImpl : TwitterSearch
-    {
-        private List<Tweet> _tweets = new List<Tweet>();
-
-        protected override bool CanExecute() => _tweets.Count >= 20;
-
-        protected override void OnTweetListReady(List<Tweet> tweets)
-        {
-            _tweets.AddRange(tweets);
-        }
-
-        public List<Tweet> Tweets => _tweets;
     }
 }

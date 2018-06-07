@@ -5,6 +5,9 @@ using System.Text;
 
 namespace TwitterSearchAPI
 {
+    /// <summary>
+    /// The twitter time line response model.
+    /// </summary>
     public class TwitterTimelineResponse
     {
         public bool has_more_items { get; set; }
