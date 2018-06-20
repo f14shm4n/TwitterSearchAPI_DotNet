@@ -26,7 +26,7 @@ Tencent-Backed Video Streamer Kuaishou Buys Struggling ACFun – Variety";
 
             List<Tweet> tweets = new List<Tweet>();
 
-            TwitterSearch searchEngine = new TwitterSearch(() => tweets.Count <= 20);
+            TwitterSearch searchEngine = new TwitterSearch(new System.Net.Http.HttpClient(), () => tweets.Count <= 20);
             searchEngine.TweetListReady += (s, e) =>
             {
                 log.WriteLine("Title: {0}, Tweets: {1}", e.Query, e.Tweets.Count);

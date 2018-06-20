@@ -18,33 +18,19 @@ namespace TwitterSearchAPI
     public class TwitterSearch
     {
         private Func<bool> _canExecute;
-        private Action<HttpClient> _configureHttpClient;
-        private CancellationToken _cToken;
+        private HttpClient _httpClient;
 
         /// <summary>
         /// Creates new instance of the twitter search.
         /// </summary>
-        /// <param name="canExecute">Determines whether the twitter search can execute next iteration.</param>
-        public TwitterSearch([NotNull]Func<bool> canExecute) : this(canExecute, null)
+        /// <param name="httpClient">The http client.</param>
+        /// <param name="canExecute">Determines whether the twitter search can execute next iteration.</param>        
+        public TwitterSearch([NotNull]HttpClient httpClient, [NotNull] Func<bool> canExecute)
         {
+            _httpClient = httpClient;
             _canExecute = canExecute;
-        }
-        /// <summary>
-        /// Creates new instance of the twitter search.
-        /// </summary>
-        /// <param name="canExecute">Determines whether the twitter search can execute next iteration.</param>
-        /// <param name="configure">Configures the http client when it created.</param>
-        public TwitterSearch([NotNull] Func<bool> canExecute, [CanBeNull] Action<HttpClient> configure)
-        {
-            _canExecute = canExecute;
-            _configureHttpClient = configure;
         }
 
-        /// <summary>
-        /// Configures the http client when it created.
-        /// </summary>
-        /// <param name="configure">Configure action.</param>
-        public void ConfigureHttpClient([CanBeNull] Action<HttpClient> configure) => _configureHttpClient = configure;
         /// <summary>
         /// Occurs when the next list of tweets is ready.
         /// </summary>
@@ -80,7 +66,7 @@ namespace TwitterSearchAPI
                 {
                     token.ThrowIfCancellationRequested();
                 }
-                
+
                 try
                 {
                     response = JsonConvert.DeserializeObject<TwitterTimelineResponse>(payload);
@@ -128,21 +114,16 @@ namespace TwitterSearchAPI
             }
         }
 
-        private async Task<string> ExecuteHttpRequestAsync(string url)
+        private Task<string> ExecuteHttpRequestAsync(string url)
         {
             try
             {
-                using (var client = new HttpClient())
-                {
-                    _configureHttpClient?.Invoke(client);
-                    return await client.GetStringAsync(url);
-                }
+                return _httpClient.GetStringAsync(url);
             }
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.ToString());
             }
-
             return null;
         }
     }
