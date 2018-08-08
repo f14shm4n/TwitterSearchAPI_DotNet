@@ -41,5 +41,23 @@ Tencent-Backed Video Streamer Kuaishou Buys Struggling ACFun – Variety";
 
             Assert.NotEmpty(tweets);
         }
+
+        [Theory]
+        [InlineData("http://www.theverge.com/2018/8/7/17660564/apple-google-infowars-app-ban-downloads")]
+        public async Task SearchUrl(string query)
+        {
+            List<Tweet> tweets = new List<Tweet>();
+
+            TwitterSearch searchEngine = new TwitterSearch(new System.Net.Http.HttpClient(), () => tweets.Count <= 20);
+            searchEngine.TweetListReady += (s, e) =>
+            {
+                log.WriteLine("Title: {0}, Tweets: {1}", e.Query, e.Tweets.Count);
+
+                tweets.AddRange(e.Tweets);
+            };
+            await searchEngine.SearchAsync(query, 100);
+
+            Assert.NotEmpty(tweets);
+        }
     }
 }

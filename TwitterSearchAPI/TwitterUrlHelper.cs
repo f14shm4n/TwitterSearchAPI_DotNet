@@ -23,7 +23,7 @@ namespace TwitterSearchAPI
             }
 
             var parameters = HttpUtility.ParseQueryString(string.Empty);
-            parameters[QUERY_PARAM] = HttpUtility.UrlEncode(query);
+            parameters[QUERY_PARAM] = query;
             parameters[TYPE_PARAM] = "tweets";
 
             if (maxPosition != null)
