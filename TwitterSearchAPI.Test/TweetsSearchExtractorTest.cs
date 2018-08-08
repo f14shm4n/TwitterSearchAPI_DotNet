@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
+using TwitterSearchAPI.Models;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace TwitterSearchAPI.Test
 {
-    public class SearchTest
+    public class TweetsSearchExtractorTest
     {
         private ITestOutputHelper log;
 
@@ -14,7 +16,7 @@ namespace TwitterSearchAPI.Test
 WSJ investigative journalist John Carreyrou on Recode Decode: transcript
 Tencent-Backed Video Streamer Kuaishou Buys Struggling ACFun – Variety";
 
-        public SearchTest(ITestOutputHelper log)
+        public TweetsSearchExtractorTest(ITestOutputHelper log)
         {
             this.log = log;
         }
@@ -26,17 +28,17 @@ Tencent-Backed Video Streamer Kuaishou Buys Struggling ACFun – Variety";
 
             List<Tweet> tweets = new List<Tweet>();
 
-            TwitterSearch searchEngine = new TwitterSearch(new System.Net.Http.HttpClient(), () => tweets.Count <= 20);
-            searchEngine.TweetListReady += (s, e) =>
-            {
-                log.WriteLine("Title: {0}, Tweets: {1}", e.Query, e.Tweets.Count);
-
-                tweets.AddRange(e.Tweets);
-            };
+            TweetsSearchExtractor searchEngine = new TweetsSearchExtractor(new HttpClient(),
+                canExecute: () => tweets.Count <= 20,
+                onResultReady: r =>
+                {
+                    log.WriteLine("Title: {0}, Tweets: {1}", r.Query, r.Tweets.Count);
+                    tweets.AddRange(r.Tweets);
+                });
 
             foreach (var t in titles)
             {
-                await searchEngine.SearchAsync(t, 100);
+                await searchEngine.ExtractAsync(t, 100);
             }
 
             Assert.NotEmpty(tweets);
@@ -48,14 +50,15 @@ Tencent-Backed Video Streamer Kuaishou Buys Struggling ACFun – Variety";
         {
             List<Tweet> tweets = new List<Tweet>();
 
-            TwitterSearch searchEngine = new TwitterSearch(new System.Net.Http.HttpClient(), () => tweets.Count <= 20);
-            searchEngine.TweetListReady += (s, e) =>
-            {
-                log.WriteLine("Title: {0}, Tweets: {1}", e.Query, e.Tweets.Count);
+            TweetsSearchExtractor searchEngine = new TweetsSearchExtractor(new HttpClient(),
+                () => tweets.Count <= 20,
+                r =>
+                {
+                    log.WriteLine("Title: {0}, Tweets: {1}", r.Query, r.Tweets.Count);
+                    tweets.AddRange(r.Tweets);
+                });
 
-                tweets.AddRange(e.Tweets);
-            };
-            await searchEngine.SearchAsync(query, 100);
+            await searchEngine.ExtractAsync(query, 100);
 
             Assert.NotEmpty(tweets);
         }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace TwitterSearchAPI
+namespace TwitterSearchAPI.Helpers
 {
     /// <summary>
     /// Provides date time actions.
