@@ -2,8 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using TwitterSearchAPI.Helpers;
+using TwitterSearchAPI.Models;
 
-namespace TwitterSearchAPI
+namespace TwitterSearchAPI.Parsers
 {
     /// <summary>
     /// Provides methods for tweets parsing.

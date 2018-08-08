@@ -3,12 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace TwitterSearchAPI
+namespace TwitterSearchAPI.Models
 {
     /// <summary>
     /// The tweets search engine event args.
     /// </summary>
-    public class TwitterSearchEventArgs : EventArgs
+    public class TweetsSearchResult
     {
         /// <summary>
         /// Gets query which related with current request. 
@@ -23,7 +23,7 @@ namespace TwitterSearchAPI
         /// </summary>
         /// <param name="query">The query which related with current request.</param>
         /// <param name="tweets">Parserd tweets.</param>
-        public TwitterSearchEventArgs([NotNull]string query, List<Tweet> tweets)
+        public TweetsSearchResult([NotNull]string query, List<Tweet> tweets)
         {
             Query = query;
             if (tweets == null)
