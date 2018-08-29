@@ -1,6 +1,8 @@
 ﻿using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using TwitterSearchAPI.Helpers;
 using TwitterSearchAPI.Models;
@@ -17,6 +19,8 @@ namespace TwitterSearchAPI.Parsers
         public static string GetTweetId(HtmlNode el) => el.Attributes["data-item-id"]?.Value;
 
         public static string GetTweetText(HtmlNode el) => el.SelectSingleNode("./descendant::p[contains(@class, 'tweet-text')]")?.InnerText;
+
+        public static string GetUrlFromTweet(HtmlNode el) => el.SelectSingleNode("./descendant::p[contains(@class, 'tweet-text')]")?.SelectNodes("./a")?.FirstOrDefault()?.Attributes["href"].Value;
 
         public static string GetUserId(HtmlNode el) => el.SelectSingleNode("./descendant::div[contains(@class, 'tweet')]")?.Attributes["data-user-id"]?.Value;
 
@@ -70,6 +74,7 @@ namespace TwitterSearchAPI.Parsers
             {
                 string id = GetTweetId(el);
                 string text = GetTweetText(el);
+                //string contentUrl = GetUrlFromTweet(el);
                 string userId = GetUserId(el);
                 string userScreenName = GetUserScreenName(el);
                 string userName = GetUserName(el);
@@ -81,6 +86,7 @@ namespace TwitterSearchAPI.Parsers
                 {
                     Id = id,
                     Text = text,
+                    //ContentUrl = contentUrl,
                     UserId = userId,
                     UserScreenName = userScreenName,
                     UserName = userName,

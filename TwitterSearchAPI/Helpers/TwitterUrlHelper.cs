@@ -38,6 +38,27 @@ namespace TwitterSearchAPI.Helpers
             return uriBuilder.ToString();
         }
 
+        public static string ConstructTimelineUrl(string initialUrl, string maxPosition)
+        {
+            if (string.IsNullOrWhiteSpace(initialUrl))
+            {
+                throw new ArgumentNullException(initialUrl);
+            }
+
+            var parameters = HttpUtility.ParseQueryString(string.Empty);
+            parameters[TYPE_PARAM] = "tweets";
+
+            if (maxPosition != null)
+            {
+                parameters[SCROLL_CURSOR_PARAM] = maxPosition;
+            }
+            UriBuilder uriBuilder = new UriBuilder(initialUrl.TrimEnd('/') + "/timeline")
+            {
+                Query = parameters.ToString()
+            };
+            return uriBuilder.ToString();
+        }
+
         public static string ConstructProfileTimelineUrl(string userScreenName, string maxPosition)
         {
             if (string.IsNullOrWhiteSpace(userScreenName))

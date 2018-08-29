@@ -9,27 +9,26 @@ using Xunit.Abstractions;
 
 namespace TwitterSearchAPI.Test
 {
-    public class TweetsFeedExtractorTest
+    public class TimeExtractorTest
     {
         private ITestOutputHelper log;
 
-        public TweetsFeedExtractorTest(ITestOutputHelper log)
+        public TimeExtractorTest(ITestOutputHelper log)
         {
             this.log = log;
         }
 
         [Theory]
-        [InlineData("Variety")]
-        [InlineData("Recode")]
-        public async Task SearchUrl(string userScreenName)
+        [InlineData("https://twitter.com/cspan/lists/members-of-congress")]
+        public async Task ExtractTimelineFromUrl(string url)
         {
             List<Tweet> tweets = new List<Tweet>();
 
-            TweetsFeedExtractor searchEngine = new TweetsFeedExtractor(new HttpClient(),
+            TimelineExtractor searchEngine = new TimelineExtractor(new HttpClient(),
                 () => tweets.Count <= 20,
                 r => tweets.AddRange(r.Tweets));
 
-            await searchEngine.ExtractAsync(userScreenName, 100);
+            await searchEngine.ExtractAsync(url, 300);
 
             foreach (var t in tweets)
             {
