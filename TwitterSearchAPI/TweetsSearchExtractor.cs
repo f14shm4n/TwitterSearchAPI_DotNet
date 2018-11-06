@@ -21,9 +21,9 @@ namespace TwitterSearchAPI
         {
         }
 
-        protected override string GetInitialUrl(string query, string maxPosition) => TwitterUrlHelper.ConstructSearchTimelineUrl(query, maxPosition);
+        protected override string GetInitialUrl(string query, long maxPosition) => TwitterUrlHelper.ConstructSearchTimelineUrl(query, maxPosition);
 
-        protected override string GetNextPageUrl(string query, string minPosition, string maxPosition)
+        protected override string GetNextPageUrl(string query, long minPosition, long maxPosition)
         {
             string nextPosition = "TWEET-" + maxPosition + "-" + minPosition;
             return TwitterUrlHelper.ConstructSearchTimelineUrl(query, nextPosition);

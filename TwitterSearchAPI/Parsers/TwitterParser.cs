@@ -74,7 +74,6 @@ namespace TwitterSearchAPI.Parsers
             {
                 string id = GetTweetId(el);
                 string text = GetTweetText(el);
-                //string contentUrl = GetUrlFromTweet(el);
                 string userId = GetUserId(el);
                 string userScreenName = GetUserScreenName(el);
                 string userName = GetUserName(el);
@@ -82,22 +81,24 @@ namespace TwitterSearchAPI.Parsers
                 int retweets = GetRetweetsCount(el);
                 int favourites = GetFavoritesCount(el);
 
-                Tweet tweet = new Tweet
+                try
                 {
-                    Id = id,
-                    Text = text,
-                    //ContentUrl = contentUrl,
-                    UserId = userId,
-                    UserScreenName = userScreenName,
-                    UserName = userName,
-                    CreatedAt = createdAt,
-                    Retweets = retweets,
-                    Favourites = favourites
-                };
-
-                if (tweet.Id != null)
-                {
+                    Tweet tweet = new Tweet
+                    {
+                        Id = long.Parse(id),
+                        Text = text,
+                        UserId = userId,
+                        UserScreenName = userScreenName,
+                        UserName = userName,
+                        CreatedAt = createdAt,
+                        Retweets = retweets,
+                        Favourites = favourites
+                    };
                     tweets.Add(tweet);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.ToString());
                 }
             }
             return tweets;

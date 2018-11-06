@@ -15,8 +15,8 @@ namespace TwitterSearchAPI
         {
         }
 
-        protected override string GetInitialUrl(string query, string maxPosition) => TwitterUrlHelper.ConstructProfileTimelineUrl(query, maxPosition);
-        protected override string GetNextPageUrl(string query, string minPosition, string maxPosition) => TwitterUrlHelper.ConstructProfileTimelineUrl(query, maxPosition);
+        protected override string GetInitialUrl(string query, long maxPosition) => TwitterUrlHelper.ConstructProfileTimelineUrl(query, maxPosition);
+        protected override string GetNextPageUrl(string query, long minPosition, long maxPosition) => TwitterUrlHelper.ConstructProfileTimelineUrl(query, maxPosition);
 
         protected override TweetsFeedResult ResultFactory(string query, List<Tweet> tweets) => new TweetsFeedResult(tweets);
     }

@@ -16,7 +16,7 @@ namespace TwitterSearchAPI.Helpers
         public const string TWITTER_SEARCH_TIMELINE_URL = "https://twitter.com/i/search/timeline";
         public const string TWITTER_PROFILE_TIMELINE_URL = "https://twitter.com/i/profiles/show/{0}/timeline/tweets";
 
-        public static string ConstructSearchTimelineUrl(string query, string maxPosition)
+        public static string ConstructSearchTimelineUrl(string query, long maxPosition)
         {
             if (string.IsNullOrWhiteSpace(query))
             {
@@ -27,9 +27,9 @@ namespace TwitterSearchAPI.Helpers
             parameters[QUERY_PARAM] = query;
             parameters[TYPE_PARAM] = "tweets";
 
-            if (maxPosition != null)
+            if (maxPosition > 0)
             {
-                parameters[SCROLL_CURSOR_PARAM] = maxPosition;
+                parameters[SCROLL_CURSOR_PARAM] = maxPosition.ToString();
             }
             UriBuilder uriBuilder = new UriBuilder(TWITTER_SEARCH_TIMELINE_URL)
             {
@@ -38,7 +38,29 @@ namespace TwitterSearchAPI.Helpers
             return uriBuilder.ToString();
         }
 
-        public static string ConstructTimelineUrl(string initialUrl, string maxPosition)
+        public static string ConstructSearchTimelineUrl(string query, string scrollCursorParam)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                throw new InvalidQueryException(query);
+            }
+
+            var parameters = HttpUtility.ParseQueryString(string.Empty);
+            parameters[QUERY_PARAM] = query;
+            parameters[TYPE_PARAM] = "tweets";
+
+            if (scrollCursorParam != null)
+            {
+                parameters[SCROLL_CURSOR_PARAM] = scrollCursorParam;
+            }
+            UriBuilder uriBuilder = new UriBuilder(TWITTER_SEARCH_TIMELINE_URL)
+            {
+                Query = parameters.ToString()
+            };
+            return uriBuilder.ToString();
+        }
+
+        public static string ConstructTimelineUrl(string initialUrl, long maxPosition)
         {
             if (string.IsNullOrWhiteSpace(initialUrl))
             {
@@ -48,9 +70,9 @@ namespace TwitterSearchAPI.Helpers
             var parameters = HttpUtility.ParseQueryString(string.Empty);
             parameters[TYPE_PARAM] = "tweets";
 
-            if (maxPosition != null)
+            if (maxPosition > 0)
             {
-                parameters[SCROLL_CURSOR_PARAM] = maxPosition;
+                parameters[SCROLL_CURSOR_PARAM] = maxPosition.ToString();
             }
             UriBuilder uriBuilder = new UriBuilder(initialUrl.TrimEnd('/') + "/timeline")
             {
@@ -59,7 +81,7 @@ namespace TwitterSearchAPI.Helpers
             return uriBuilder.ToString();
         }
 
-        public static string ConstructProfileTimelineUrl(string userScreenName, string maxPosition)
+        public static string ConstructProfileTimelineUrl(string userScreenName, long maxPosition)
         {
             if (string.IsNullOrWhiteSpace(userScreenName))
             {
@@ -67,9 +89,9 @@ namespace TwitterSearchAPI.Helpers
             }
 
             var parameters = HttpUtility.ParseQueryString(string.Empty);
-            if (maxPosition != null)
+            if (maxPosition > 0)
             {
-                parameters[SCROLL_CURSOR_PARAM] = maxPosition;
+                parameters[SCROLL_CURSOR_PARAM] = maxPosition.ToString();
             }
             UriBuilder uriBuilder = new UriBuilder(string.Format(TWITTER_PROFILE_TIMELINE_URL, userScreenName))
             {

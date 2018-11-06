@@ -29,8 +29,8 @@ namespace TwitterSearchAPI
 
         #region Abstract
 
-        protected abstract string GetInitialUrl(string query, string maxPosition);
-        protected abstract string GetNextPageUrl(string query, string minPosition, string maxPosition);
+        protected abstract string GetInitialUrl(string query, long maxPosition);
+        protected abstract string GetNextPageUrl(string query, long minPosition, long maxPosition);
         protected abstract T ResultFactory(string query, List<Tweet> tweets);
 
         #endregion
@@ -57,7 +57,7 @@ namespace TwitterSearchAPI
         public async Task ExtractAsync([NotNull] string query, int rateInMillis, CancellationToken token)
         {
             TwitterTimelineResponse response = null;
-            string minTweet = null;
+            long minTweet = 0;
             string url = GetInitialUrl(query, minTweet);
             string payload = null;
             List<Tweet> tweets;
@@ -75,6 +75,7 @@ namespace TwitterSearchAPI
                 }
                 catch (JsonReaderException ex)
                 {
+                    Debug.WriteLine($"User-Agent: {_httpClient.DefaultRequestHeaders.UserAgent.First().ToString()}");
                     Debug.WriteLine(ex.ToString());
                 }
 
@@ -91,7 +92,7 @@ namespace TwitterSearchAPI
 
                 _onResultReady(ResultFactory(query, tweets));
 
-                if (minTweet == null)
+                if (minTweet == 0)
                 {
                     minTweet = tweets.First().Id;
                 }
@@ -101,8 +102,8 @@ namespace TwitterSearchAPI
                     break;
                 }
 
-                string maxTweet = tweets.Last().Id;
-                if (!minTweet.Equals(maxTweet))
+                long maxTweet = tweets.Last().Id;
+                if (minTweet != maxTweet)
                 {
                     await Task.Delay(rateInMillis, token);
 
