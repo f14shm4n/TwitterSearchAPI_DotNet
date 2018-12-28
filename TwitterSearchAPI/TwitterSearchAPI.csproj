@@ -5,15 +5,23 @@
     <Authors>f14shm4n</Authors>
     <Company>f14shm4n</Company>
     <Copyright>f14shm4n</Copyright>
-    <Description>The TwitterSearchAPI port of https://github.com/tomkdickinson/TwitterSearchAPI.</Description>    
-    <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
+    <Description>The TwitterSearchAPI port of https://github.com/tomkdickinson/TwitterSearchAPI.</Description>        
     <PackageProjectUrl>https://github.com/f14shm4n/TwitterSearchAPI_DotNet</PackageProjectUrl>
     <RepositoryUrl>https://github.com/f14shm4n/TwitterSearchAPI_DotNet</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>NetStandard;Twitter;Search</PackageTags>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Version>3.0.0</Version>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="licenses\LICENSE.txt" Pack="true" PackagePath=""/>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="HtmlAgilityPack" Version="1.8.4" />
