@@ -1,3 +1,5 @@
+# [IMPORTANT] This description for versions < 2.0
+
 # TwitterSearchAPI_DotNet
 
 This is a port of the Java project to use Twitter search with out TwitterAPI. 
