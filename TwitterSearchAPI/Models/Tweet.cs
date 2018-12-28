@@ -10,36 +10,40 @@ namespace TwitterSearchAPI.Models
         /// <summary>
         /// Tweet id.
         /// </summary>
-        public string Id { get; set; }
+        public virtual long Id { get; set; }
         /// <summary>
         /// Tweet text.
         /// </summary>
-        public string Text { get; set; }
+        public virtual string Text { get; set; }
         /// <summary>
         /// Tweet user id.
         /// </summary>
-        public string UserId { get; set; }
+        public virtual string UserId { get; set; }
         /// <summary>
         /// Tweet user name.
         /// </summary>
-        public string UserName { get; set; }
+        public virtual string UserName { get; set; }
         /// <summary>
         /// Tweet user screen name.
         /// </summary>
-        public string UserScreenName { get; set; }
+        public virtual string UserScreenName { get; set; }
         /// <summary>
         /// Tweet publish date.
         /// </summary>
-        public DateTime? CreatedAt { get; set; }
+        public virtual DateTime? CreatedAt { get; set; }
         /// <summary>
         /// Retweets count.
         /// </summary>
-        public int Retweets { get; set; }
+        public virtual int Retweets { get; set; }
         /// <summary>
         /// Favorites count.
         /// </summary>
-        public int Favourites { get; set; }
+        public virtual int Favourites { get; set; }
+        /// <summary>
+        /// Comments count.
+        /// </summary>
+        public virtual int Comments { get; set; }
 
-        public override string ToString() => $"Id: {Id}, UserId: {UserId}, UserName: {UserName}, UserScreenName: {UserScreenName}, Retweets: {Retweets}, Favorites: {Favourites}, CreatedAt: {CreatedAt}, Text: {Text}";
+        public override string ToString() => $"Id: {Id}, UserId: {UserId}, UserName: {UserName}, UserScreenName: {UserScreenName}, Retweets: {Retweets}, Favorites: {Favourites}, Comments: {Comments}, CreatedAt: {CreatedAt}, Text: {Text}";
     }
 }
