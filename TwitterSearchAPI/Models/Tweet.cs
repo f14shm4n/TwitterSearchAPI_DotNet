@@ -39,7 +39,11 @@ namespace TwitterSearchAPI.Models
         /// Favorites count.
         /// </summary>
         public virtual int Favourites { get; set; }
+        /// <summary>
+        /// Comments count.
+        /// </summary>
+        public virtual int Comments { get; set; }
 
-        public override string ToString() => $"Id: {Id}, UserId: {UserId}, UserName: {UserName}, UserScreenName: {UserScreenName}, Retweets: {Retweets}, Favorites: {Favourites}, CreatedAt: {CreatedAt}, Text: {Text}";
+        public override string ToString() => $"Id: {Id}, UserId: {UserId}, UserName: {UserName}, UserScreenName: {UserScreenName}, Retweets: {Retweets}, Favorites: {Favourites}, Comments: {Comments}, CreatedAt: {CreatedAt}, Text: {Text}";
     }
 }

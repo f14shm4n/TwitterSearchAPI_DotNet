@@ -16,28 +16,6 @@ namespace TwitterSearchAPI.Helpers
         public const string TWITTER_SEARCH_TIMELINE_URL = "https://twitter.com/i/search/timeline";
         public const string TWITTER_PROFILE_TIMELINE_URL = "https://twitter.com/i/profiles/show/{0}/timeline/tweets";
 
-        public static string ConstructSearchTimelineUrl(string query, long maxPosition)
-        {
-            if (string.IsNullOrWhiteSpace(query))
-            {
-                throw new InvalidQueryException(query);
-            }
-
-            var parameters = HttpUtility.ParseQueryString(string.Empty);
-            parameters[QUERY_PARAM] = query;
-            parameters[TYPE_PARAM] = "tweets";
-
-            if (maxPosition > 0)
-            {
-                parameters[SCROLL_CURSOR_PARAM] = maxPosition.ToString();
-            }
-            UriBuilder uriBuilder = new UriBuilder(TWITTER_SEARCH_TIMELINE_URL)
-            {
-                Query = parameters.ToString()
-            };
-            return uriBuilder.ToString();
-        }
-
         public static string ConstructSearchTimelineUrl(string query, string scrollCursorParam)
         {
             if (string.IsNullOrWhiteSpace(query))
@@ -60,11 +38,11 @@ namespace TwitterSearchAPI.Helpers
             return uriBuilder.ToString();
         }
 
-        public static string ConstructTimelineUrl(string initialUrl, long maxPosition)
+        public static string ConstructTimelineUrl(string timelineUrl, long maxPosition)
         {
-            if (string.IsNullOrWhiteSpace(initialUrl))
+            if (string.IsNullOrWhiteSpace(timelineUrl))
             {
-                throw new ArgumentNullException(initialUrl);
+                throw new ArgumentNullException(timelineUrl);
             }
 
             var parameters = HttpUtility.ParseQueryString(string.Empty);
@@ -74,7 +52,13 @@ namespace TwitterSearchAPI.Helpers
             {
                 parameters[SCROLL_CURSOR_PARAM] = maxPosition.ToString();
             }
-            UriBuilder uriBuilder = new UriBuilder(initialUrl.TrimEnd('/') + "/timeline")
+
+            if (!timelineUrl.EndsWith("/timeline"))
+            {
+                timelineUrl = timelineUrl.TrimEnd('/') + "/timeline";
+            }
+
+            UriBuilder uriBuilder = new UriBuilder(timelineUrl)
             {
                 Query = parameters.ToString()
             };

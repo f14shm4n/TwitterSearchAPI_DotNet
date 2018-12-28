@@ -14,6 +14,54 @@ namespace TwitterSearchAPI.Parsers
     /// </summary>
     internal class TwitterParser
     {
+        public static List<Tweet> ParseTweets(string html)
+        {
+            List<Tweet> tweets = new List<Tweet>();
+            var doc = new HtmlDocument();
+            doc.LoadHtml(html);
+
+            var elements = GetTweetsNodes(doc.DocumentNode);
+            if (elements == null || elements.Count == 0)
+            {
+                return tweets;
+            }
+
+            foreach (var el in elements)
+            {
+                string id = GetTweetId(el);
+                string text = GetTweetText(el);
+                string userId = GetUserId(el);
+                string userScreenName = GetUserScreenName(el);
+                string userName = GetUserName(el);
+                DateTime? createdAt = GetPublishDate(el);
+                int retweets = GetRetweetsCount(el);
+                int favourites = GetFavoritesCount(el);
+                int comments = GetCommentsCount(el);
+
+                try
+                {
+                    Tweet tweet = new Tweet
+                    {
+                        Id = long.Parse(id),
+                        Text = text,
+                        UserId = userId,
+                        UserScreenName = userScreenName,
+                        UserName = userName,
+                        CreatedAt = createdAt,
+                        Retweets = retweets,
+                        Favourites = favourites,
+                        Comments = comments
+                    };
+                    tweets.Add(tweet);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.ToString());
+                }
+            }
+            return tweets;
+        }
+
         public static HtmlNodeCollection GetTweetsNodes(HtmlNode docNode) => docNode.SelectNodes("//li[contains(@class, 'js-stream-item')]");
 
         public static string GetTweetId(HtmlNode el) => el.Attributes["data-item-id"]?.Value;
@@ -58,50 +106,14 @@ namespace TwitterSearchAPI.Parsers
             return 0;
         }
 
-        public static List<Tweet> ParseTweets(string html)
+        public static int GetCommentsCount(HtmlNode el)
         {
-            List<Tweet> tweets = new List<Tweet>();
-            var doc = new HtmlDocument();
-            doc.LoadHtml(html);
-
-            var elements = GetTweetsNodes(doc.DocumentNode);
-            if (elements == null || elements.Count == 0)
+            var raw = el.SelectSingleNode("./descendant::span[contains(@class, 'ProfileTweet-action--reply')]/span[@class='ProfileTweet-actionCount']")?.Attributes["data-tweet-stat-count"]?.Value;
+            if (int.TryParse(raw, out int count))
             {
-                return tweets;
+                return count;
             }
-
-            foreach (var el in elements)
-            {
-                string id = GetTweetId(el);
-                string text = GetTweetText(el);
-                string userId = GetUserId(el);
-                string userScreenName = GetUserScreenName(el);
-                string userName = GetUserName(el);
-                DateTime? createdAt = GetPublishDate(el);
-                int retweets = GetRetweetsCount(el);
-                int favourites = GetFavoritesCount(el);
-
-                try
-                {
-                    Tweet tweet = new Tweet
-                    {
-                        Id = long.Parse(id),
-                        Text = text,
-                        UserId = userId,
-                        UserScreenName = userScreenName,
-                        UserName = userName,
-                        CreatedAt = createdAt,
-                        Retweets = retweets,
-                        Favourites = favourites
-                    };
-                    tweets.Add(tweet);
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex.ToString());
-                }
-            }
-            return tweets;
+            return 0;
         }
     }
 }
