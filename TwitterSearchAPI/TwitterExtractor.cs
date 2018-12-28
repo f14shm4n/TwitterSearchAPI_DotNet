@@ -54,8 +54,9 @@ namespace TwitterSearchAPI
             return ExtractAsync(
                 initialUrl: initialUrl,
                 nextPageUrlGenerator: meta => TwitterUrlHelper.ConstructSearchTimelineUrl(info.Query, "TWEET-" + meta.MaxTweet + "-" + meta.MinTweet),
-                onTweetsExtracted: onTweetsExtracted,
+                onItemsExtracted: onTweetsExtracted,
                 canExecute: canExecute,
+                htmlParser: html => TweetParser.ParseTweets(html),
                 info: info);
         }
         /// <summary>
@@ -71,8 +72,9 @@ namespace TwitterSearchAPI
             return ExtractAsync(
                 initialUrl: initialUrl,
                 nextPageUrlGenerator: meta => TwitterUrlHelper.ConstructProfileTimelineUrl(info.UserScreenName, meta.MaxTweet),
-                onTweetsExtracted: onTweetsExtracted,
+                onItemsExtracted: onTweetsExtracted,
                 canExecute: canExecute,
+                htmlParser: html => TweetParser.ParseTweets(html),
                 info: info);
         }
         /// <summary>
@@ -88,8 +90,45 @@ namespace TwitterSearchAPI
             return ExtractAsync(
                 initialUrl: initialUrl,
                 nextPageUrlGenerator: meta => TwitterUrlHelper.ConstructTimelineUrl(info.TimelineUrl, meta.MaxTweet),
-                onTweetsExtracted: onTweetsExtracted,
+                onItemsExtracted: onTweetsExtracted,
                 canExecute: canExecute,
+                htmlParser: html => TweetParser.ParseTweets(html),
+                info: info);
+        }
+        /// <summary>
+        /// Extracts members profiles uses twitter list url.
+        /// </summary>
+        /// <param name="info">Execution info. Setup your data here.</param>
+        /// <param name="onUsersExtracted">Action which will be called each time when a new part of profiles are extracted.</param>
+        /// <param name="canExecute">Uses to manage the execution process. Setup it as you need, to control when you want to stop extraction.</param>
+        /// <returns>The async task.</returns>
+        public virtual Task ExtractTwitterListMembersAsync([NotNull] TwitterListExecutionInfo info, Action<IEnumerable<UserProfile>> onUsersExtracted, Func<bool> canExecute)
+        {
+            var initialUrl = TwitterUrlHelper.ConstructTwitterListMembersTimelineUrl(info.TwitterListUrl, 0);
+            return ExtractAsync(
+                initialUrl: initialUrl,
+                nextPageUrlGenerator: meta => TwitterUrlHelper.ConstructTwitterListMembersTimelineUrl(info.TwitterListUrl, meta.MaxTweet),
+                onItemsExtracted: onUsersExtracted,
+                canExecute: canExecute,
+                htmlParser: html => UserListParser.ParseProfiles(html),
+                info: info);
+        }
+        /// <summary>
+        /// Extracts subscribers profiles uses twitter list url.
+        /// </summary>
+        /// <param name="info">Execution info. Setup your data here.</param>
+        /// <param name="onUsersExtracted">Action which will be called each time when a new part of profiles are extracted.</param>
+        /// <param name="canExecute">Uses to manage the execution process. Setup it as you need, to control when you want to stop extraction.</param>
+        /// <returns>The async task.</returns>
+        public virtual Task ExtractTwitterListSubscribersAsync([NotNull] TwitterListExecutionInfo info, Action<IEnumerable<UserProfile>> onUsersExtracted, Func<bool> canExecute)
+        {
+            var initialUrl = TwitterUrlHelper.ConstructTwitterListSubscribersTimelineUrl(info.TwitterListUrl, 0);
+            return ExtractAsync(
+                initialUrl: initialUrl,
+                nextPageUrlGenerator: meta => TwitterUrlHelper.ConstructTwitterListSubscribersTimelineUrl(info.TwitterListUrl, meta.MaxTweet),
+                onItemsExtracted: onUsersExtracted,
+                canExecute: canExecute,
+                htmlParser: html => UserListParser.ParseProfiles(html),
                 info: info);
         }
 
@@ -100,20 +139,22 @@ namespace TwitterSearchAPI
         /// <summary>
         /// Main extraction method.
         /// </summary>
+        /// <typeparam name="T"></typeparam>
         /// <param name="initialUrl">Initial url.</param>
         /// <param name="nextPageUrlGenerator">Next page url generator.</param>
         /// <param name="onTweetsExtracted">Action which will be called each time when a new part of tweets are extracted.</param>
         /// <param name="canExecute">Uses to manage the execution process. Setup it as you need, to control when you want to stop extraction.</param>
+        /// <param name="htmlParser">Html parser.</param>
         /// <param name="info">Base execution info.</param>
         /// <returns></returns>
-        protected virtual async Task ExtractAsync(string initialUrl, Func<NextPageMeta, string> nextPageUrlGenerator, Action<IEnumerable<Tweet>> onTweetsExtracted, Func<bool> canExecute, ExecutionInfo info)
+        protected virtual async Task ExtractAsync<T>(string initialUrl, Func<NextPageMeta, string> nextPageUrlGenerator, Action<IEnumerable<T>> onItemsExtracted, Func<bool> canExecute, Func<string, List<T>> htmlParser, ExecutionInfo info) where T : ITwitterItem
         {
             // Define vars
             TimelineResponse response = null;
             long minTweet = 0;
             string url = initialUrl;
             string payload = null;
-            List<Tweet> tweets;
+            List<T> items;
             // Start execution
             while ((payload = await ExecuteHttpRequestAsync(url)) != null)
             {
@@ -136,14 +177,14 @@ namespace TwitterSearchAPI
                 {
                     break;
                 }
-                // Parse tweets
-                tweets = TwitterParser.ParseTweets(response.ItemsHtml);
-                if (tweets.Count == 0)
+                // Parse items
+                items = htmlParser(response.ItemsHtml);
+                if (items.Count == 0)
                 {
                     break;
                 }
                 // Push tweets to external code
-                onTweetsExtracted(tweets);
+                onItemsExtracted(items);
                 // Check if we should to stop the extractor
                 if (!canExecute())
                 {
@@ -152,9 +193,9 @@ namespace TwitterSearchAPI
                 // Gather data for generate next page url
                 if (minTweet == 0)
                 {
-                    minTweet = tweets.First().Id;
+                    minTweet = items.First().Id;
                 }
-                long maxTweet = tweets.Last().Id;
+                long maxTweet = items.Last().Id;
                 if (minTweet != maxTweet)
                 {
                     // Wait for some time
