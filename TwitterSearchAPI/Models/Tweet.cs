@@ -5,7 +5,7 @@ namespace TwitterSearchAPI.Models
     /// <summary>
     /// Tweet model.
     /// </summary>
-    public class Tweet
+    public class Tweet : ITwitterItem
     {
         /// <summary>
         /// Tweet id.
@@ -44,6 +44,6 @@ namespace TwitterSearchAPI.Models
         /// </summary>
         public virtual int Comments { get; set; }
 
-        public override string ToString() => $"Id: {Id}, UserId: {UserId}, UserName: {UserName}, UserScreenName: {UserScreenName}, Retweets: {Retweets}, Favorites: {Favourites}, Comments: {Comments}, CreatedAt: {CreatedAt}, Text: {Text}";
+        public override string ToString() => $"[{Id}; {UserId}; {UserName}; {UserScreenName}; {Retweets}; {Favourites}; {Comments}; {CreatedAt}; {Text}]";
     }
 }

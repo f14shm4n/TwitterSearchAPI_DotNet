@@ -93,5 +93,53 @@ namespace TwitterSearchAPI.Test
 
             Assert.NotEmpty(tweets);
         }
+
+        [Theory]
+        [InlineData("https://twitter.com/cspan/lists/members-of-congress")]
+        [InlineData("https://twitter.com/NYTMetro/lists/nyt-nyc-local-news")]
+        public async Task ExtractTwitterListMembersAsync(string twitterListUrl)
+        {
+            List<UserProfile> profiles = new List<UserProfile>();
+
+            TwitterExtractor extractor = new TwitterExtractor(new HttpClient());
+            await extractor.ExtractTwitterListMembersAsync(
+                new TwitterListExecutionInfo
+                {
+                    TwitterListUrl = twitterListUrl
+                },
+                canExecute: () => profiles.Count <= 20,
+                onUsersExtracted: results => profiles.AddRange(results));
+
+            foreach (var t in profiles)
+            {
+                log.WriteLine(t.ToString());
+            }
+
+            Assert.NotEmpty(profiles);
+        }
+
+        [Theory]
+        [InlineData("https://twitter.com/cspan/lists/members-of-congress")]
+        [InlineData("https://twitter.com/NYTMetro/lists/nyt-nyc-local-news")]
+        public async Task ExtractTwitterListSubscribersAsync(string twitterListUrl)
+        {
+            List<UserProfile> profiles = new List<UserProfile>();
+
+            TwitterExtractor extractor = new TwitterExtractor(new HttpClient());
+            await extractor.ExtractTwitterListSubscribersAsync(
+                new TwitterListExecutionInfo
+                {
+                    TwitterListUrl = twitterListUrl
+                },
+                canExecute: () => profiles.Count <= 20,
+                onUsersExtracted: results => profiles.AddRange(results));
+
+            foreach (var t in profiles)
+            {
+                log.WriteLine(t.ToString());
+            }
+
+            Assert.NotEmpty(profiles);
+        }
     }
 }
