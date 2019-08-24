@@ -11,7 +11,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>NetStandard;Twitter;Search</PackageTags>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>3.1.0</Version>
+    <Version>3.2.0</Version>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
@@ -20,7 +20,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="licenses\LICENSE.txt" Pack="true" PackagePath=""/>
+    <None Include="licenses\LICENSE.txt" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <ItemGroup>
