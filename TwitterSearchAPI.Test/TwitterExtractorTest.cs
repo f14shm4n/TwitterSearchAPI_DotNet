@@ -16,16 +16,15 @@ namespace TwitterSearchAPI.Test
         {
             this.log = log;
         }
-        
+
         [Theory]
-        [InlineData("Twitter to Join S&P 500, Stock Hits Record Highs – Variety")]
-        [InlineData("WSJ investigative journalist John Carreyrou on Recode Decode: transcript")]
-        [InlineData("Tencent-Backed Video Streamer Kuaishou Buys Struggling ACFun – Variety")]
+        [InlineData("Telemundo Has &#8216;Game of Thrones&#8217; Hopes for &#8216;La Reina del Sur&#8217; Season 2 Premiere")]
+        [InlineData("Tanya Tucker’s ‘While I’m Livin”")]
         public async Task SearchTweetsAsync(string title)
         {
             List<Tweet> tweets = new List<Tweet>();
 
-            TwitterExtractor extractor = new TwitterExtractor(new HttpClient());
+            var extractor = new TweetExtractor(new HttpClient());            
             await extractor.SearchTweetsAsync(
                 new SearchExecutionInfo
                 {
@@ -52,7 +51,7 @@ namespace TwitterSearchAPI.Test
         {
             List<Tweet> tweets = new List<Tweet>();
 
-            TwitterExtractor extractor = new TwitterExtractor(new HttpClient());
+            var extractor = new TweetExtractor(new HttpClient());
             await extractor.ExtractTweetsFromUserTimelineAsync(
                 new ProfileTimelineExecutionInfo
                 {
@@ -77,7 +76,7 @@ namespace TwitterSearchAPI.Test
         {
             List<Tweet> tweets = new List<Tweet>();
 
-            TwitterExtractor extractor = new TwitterExtractor(new HttpClient());
+            var extractor = new TweetExtractor(new HttpClient());
             await extractor.ExtractTweetsFromTimelineAsync(
                 new TimelineExecutionInfo
                 {
@@ -101,7 +100,7 @@ namespace TwitterSearchAPI.Test
         {
             List<UserProfile> profiles = new List<UserProfile>();
 
-            TwitterExtractor extractor = new TwitterExtractor(new HttpClient());
+            var extractor = new UserExtractor(new HttpClient());
             await extractor.ExtractTwitterListMembersAsync(
                 new TwitterListExecutionInfo
                 {
@@ -125,7 +124,7 @@ namespace TwitterSearchAPI.Test
         {
             List<UserProfile> profiles = new List<UserProfile>();
 
-            TwitterExtractor extractor = new TwitterExtractor(new HttpClient());
+            var extractor = new UserExtractor(new HttpClient());
             await extractor.ExtractTwitterListSubscribersAsync(
                 new TwitterListExecutionInfo
                 {

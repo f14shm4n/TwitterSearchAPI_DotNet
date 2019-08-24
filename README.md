@@ -1,6 +1,4 @@
-# [IMPORTANT] This description for versions < 2.0
-
-# TwitterSearchAPI_DotNet
+# TwitterSearchAPI .Net Standard
 
 This is a port of the Java project to use Twitter search with out TwitterAPI. 
 
@@ -8,42 +6,123 @@ See original repo: https://github.com/tomkdickinson/TwitterSearchAPI.
 
 This project has some differences from the original Java-project, but in general it provides the same functionality.
 
+**Note: The original Java code is completely reworked, but main algorithm here.**
+
 ## Requirements
 
-This project targeting on the **.Net Standard 2.0**.
+- **.Net Standard 2.0**
 
 ## Install
 
 [Nuget](https://www.nuget.org/packages/TwitterSearchAPI): `Install-Package TwitterSearchAPI`
 
-## How to it works?
+## Supported methods of data extraction
 
-The search engine does not persists all found tweets in internal collections, 
-instead of this the search engine fire the special event that provides a tweets collection 
-for current search iteration. The event listener decide what to do with this tweets.
+- Search tweets by [*text or what you like*], this method do the same as you can achive using regular [twitter search](https://twitter.com/search-home);
+- Extracts tweets from user timeline, for example, from this url: https://twitter.com/variety
+- Extracts tweets from list timeline, for example, from this url: https://twitter.com/NYTMetro/lists/nyt-nyc-local-news
+- Extracts a list of members from twitter list, for example, from this url: https://twitter.com/NYTMetro/lists/nyt-nyc-local-news/members
+- Extracts a list of subscribers from twitter list, from example, from this url: https://twitter.com/NYTMetro/lists/nyt-nyc-local-news/subscribers 
 
-## How to use
+## Usage
 
-Firstly, we need to create the search engine and collection where we will store our tweets:
+### Search tweets
+
+```C#
+// Define a list where we will store the results
+List<Tweet> tweets = new List<Tweet>();
+// Creates extractor
+var extractor = new TweetExtractor(new HttpClient());            
+// Run extractor
+await extractor.SearchTweetsAsync(
+    // Creates a search info with search query.
+    new SearchExecutionInfo
+    {
+        // Don't worry about encoding special chars
+        // it will work and with this input: "Tanya Tucker’s ‘While I’m Livin”"
+        Query = "Telemundo Has &#8216;Game of Thrones&#8217; Hopes for &#8216;La Reina del Sur&#8217; Season 2 Premiere"
+    },
+    // Stop the extractor after we get 20 items at least.
+    canExecute: () => tweets.Count <= 20,
+    // Here we put found tweets into our list
+    onTweetsExtracted: results =>
+    {
+        tweets.AddRange(results);
+});
+
+... Here you can work with tweets from list ...
+```
+
+### Extract tweets from user timeline
 
 ```C#
 List<Tweet> tweets = new List<Tweet>();
-TwitterSearch searchEngine = new TwitterSearch(new System.Net.Http.HttpClient(), () => tweets.Count <= 20);
+
+var extractor = new TweetExtractor(new HttpClient());
+await extractor.ExtractTweetsFromUserTimelineAsync(
+    new ProfileTimelineExecutionInfo
+    {
+        // This we use any public user_screen_name like: 'Variety', 'Recode' and etc
+        UserScreenName = "Variety"
+    },
+    canExecute: () => tweets.Count <= 20,
+    onTweetsExtracted: results => tweets.AddRange(results)
+);
 ```
 
-The main part in a line above is `() => tweets.Count <= 20`, this code define the search engine execute condition.
-While our list of tweets contains less than or equal to 20 tweets, the search engine will work as soon as the number of tweets is more than 20, then the search will be stopped.
-
-Secondly, we subscribe to an event that provides us tweets that have been found and started searching:
+### Extract tweets from list timeline
 
 ```C#
-searchEngine.TweetListReady += (s, e) =>
-{
-    tweets.AddRange(e.Tweets);
-};
-await searchEngine.SearchAsync("Awesome tweet", 100);
+List<Tweet> tweets = new List<Tweet>();
+
+var extractor = new TweetExtractor(new HttpClient());
+await extractor.ExtractTweetsFromTimelineAsync(
+    new TimelineExecutionInfo
+    {
+        // This we use any list timeline url like: 
+        // "https://twitter.com/cspan/lists/members-of-congress"
+        // "https://twitter.com/NYTMetro/lists/nyt-nyc-local-news"
+        TimelineUrl = "https://twitter.com/NYTMetro/lists/nyt-nyc-local-news"
+    },
+    canExecute: () => tweets.Count <= 20,
+    onTweetsExtracted: results => tweets.AddRange(results)
+);
 ```
 
-In a last line we pass the search query `Awesome tweet` and the interval between search iteration in millis.
+### Extract twitter list members
 
-It's all.
+```C#
+List<UserProfile> profiles = new List<UserProfile>();
+
+var extractor = new UserExtractor(new HttpClient());
+await extractor.ExtractTwitterListMembersAsync(
+    new TwitterListExecutionInfo
+    {
+        // Input any twitter list url
+        TwitterListUrl = "https://twitter.com/cspan/lists/members-of-congress"
+    },
+    canExecute: () => profiles.Count <= 20,
+    onUsersExtracted: results => profiles.AddRange(results)
+);
+```
+
+### Extract twitter list subscribers
+
+```C#
+List<UserProfile> profiles = new List<UserProfile>();
+
+var extractor = new UserExtractor(new HttpClient());
+await extractor.ExtractTwitterListSubscribersAsync(
+    new TwitterListExecutionInfo
+    {
+        // Input any twitter list url
+        TwitterListUrl = "https://twitter.com/cspan/lists/members-of-congress"
+    },
+    canExecute: () => profiles.Count <= 20,
+    onUsersExtracted: results => profiles.AddRange(results)
+);
+```
+
+# License
+
+[MIT](https://github.com/f14shm4n/TwitterSearchAPI_DotNet/blob/master/LICENSE.md)

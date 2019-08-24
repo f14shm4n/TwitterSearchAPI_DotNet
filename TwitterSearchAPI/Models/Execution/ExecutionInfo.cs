@@ -18,5 +18,13 @@ namespace TwitterSearchAPI.Models
         /// Execution rate.
         /// </summary>
         public TimeSpan ExecutionRate { get; set; } = TimeSpan.FromMilliseconds(500);
+        /// <summary>
+        /// Custom generator for initial url.
+        /// </summary>
+        public Func<string, string> InitialUrlGenerator { get; set; }
+        /// <summary>
+        /// Custom generator for next page url.
+        /// </summary>
+        public Func<string, NextPageMeta, string> NextPageUrlGenerator { get; set; }
     }
 }
